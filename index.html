@@ -1,136 +1,549 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<head>
-<style type="text/css">
-H1 {color:red}
-P  {font-family:Arial; font-size:14pt}
-B  {color:blue}
-</style>
-<title>Public-Key encryption Demo</title>
-<script language="JavaScript1.2">
- A  = new Array (35);
-Chars0 = "................................"; // 0-31
-	Chars1 = ' !"#$%&.()*.,-./0123456789:;<=>?'; //32-63
-	Chars2 = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_"; //64-95
-	Chars3 = "..abcdefghijklmnopqrstuvwxyz{|}~."; //96-127
-	Chars4 = "................................"; //128 - 159
-	Chars5 = "��������������������������������"; //160 - 191
-	Chars6 = "��������������������������������"; //192 - 223
-	Chars7 = "��������������������������������"; //224 - 255
-	all_Chars = Chars0+Chars1+Chars2+Chars3+Chars4+Chars5+Chars6+Chars7;
-
-function clear() {
-	document.gen_form.public_key.value ="";
-	document.gen_form.private_key.value= "";
-	document.myform.input.value="";
-	document.myform.encrypt_key.value = "";
-	document.myform.crypted.value="";
-}
-
-function generate() {
-	today = new Date();
-	key1 = today.getTime()%256;
-	document.gen_form.public_key.value = key1;
-	document.gen_form.private_key.value= 256 - key1;
-}
-
-		
-function encrypt() {
- 
-	len = document.myform.input.value.length;
-	message = document.myform.input.value;
-	key = document.myform.encrypt_key.value;
-
-	document.myform.crypted.value="";
-	for (n=0;n<len;n++) {
-	 A[n] =  message.charCodeAt(n);
-         for (j=0;j<key;j++){
-	    A[n] ++; 
-         }
-         //document.myform.crypted.value += " ";
-	 document.myform.crypted.value += A[n];
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public-Key Encryption Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-}
 
-function decrypt() {
-	
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
 
-	key = document.decrypt_form.decrypt_key.value - 256;
-	len = document.myform.input.value.length;
-	document.decrypt_form.decrypted.value="";
-        for (i=0;i<len;i++) {
-	    decrypt_value = (A[i]+key)%256;
-	    document.decrypt_form.decrypted.value += all_Chars.charAt(decrypt_value);
-	}
-}
-</script>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .step {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 16px;
+            border-left: 4px solid #4f46e5;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-number {
+            background: #4f46e5;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .step h3 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .step p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: 500;
+            color: #374151;
+            min-width: 120px;
+        }
+
+        input[type="text"] {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-small {
+            width: 80px;
+        }
+
+        .input-medium {
+            width: 300px;
+        }
+
+        .input-large {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .result-box {
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .hint {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #92400e;
+        }
+
+        .hint i {
+            margin-right: 0.5rem;
+        }
+
+        .key-display {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .key-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .status-ready {
+            background: #10b981;
+        }
+
+        .status-pending {
+            background: #f59e0b;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            .step {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            label {
+                min-width: auto;
+                margin-bottom: 0.5rem;
+            }
+
+            .key-display {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body bgcolor="oldlace" onLoad=clear()>
-<center>
-<h1>Public-Key encryption Demo</h1>
-</center>
-<font color="blue"><h3>Step 1: Generate Keys</h3></font>
-<P>Press the button to generate a pair of randomly chosen keys.</p>
-<ul>
-<li>
-<P>
-The <b>public key</b> will be posted in a  public key repository
-where anyone can find it. </p?
-<li><P>The <b>private key</b> should be known only to
-you.</p>
-</ul>
-<form name="gen_form">
-<input type="button" value="Generate keys" onClick = generate()>
-Public key: &nbsp; 
-<input type ="text" size=5 name="public_key">
-Private key: &nbsp; 
-<input type ="text" size=5 name="private_key">
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-lock"></i> Public-Key Encryption Demo</h1>
+            <p>Learn how asymmetric encryption works with this interactive demonstration</p>
+        </div>
 
-</form>
-<font color="blue"><h3>Step 2: Encrypt the message </h3></font>
-<P>Now type in a short message and enter one of the keys from above.
-Then press the button.</p>
-<form name="myform">
-Message: &nbsp;
-<input type="text" size=35 value="" name="input">
-Encryption key:
-&nbsp; <input type="text" size=5 name = encrypt_key>
-&nbsp; <input type="button" value="Encode message"
- onClick=encrypt()><P>
-<font color="red"><b>The encrypted message:</b></font>
-<input type="text" size=75 value="" name="crypted">
-</form>
-<font color="blue"><h3>Step 3: Decrypt the message </h3></font>
-<P>Pretend that you have received the encrypted message over the Internet. 
-Now enter an appropriate decryption key and press the "Decode" button.</p>
-<P>
-<i>Hint:</i> If you used one of the two keys generated in step 1, 
-the other key works here.</p>
-<form name="decrypt_form">
+        <div class="content">
+            <!-- Step 1: Generate Keys -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <h3>Generate Key Pair</h3>
+                </div>
+                <p>Generate a pair of mathematically related keys. The public key can be shared openly, while the private key must remain secret.</p>
+                
+                <form name="gen_form">
+                    <div class="form-group">
+                        <button type="button" class="btn" onclick="generate()">
+                            <i class="fas fa-key"></i>
+                            Generate Keys
+                        </button>
+                    </div>
+                    
+                    <div class="key-display">
+                        <div class="key-item">
+                            <label for="public_key">Public Key:</label>
+                            <input type="text" name="public_key" id="public_key" class="input-small" readonly>
+                            <span id="public-status" class="status-indicator"></span>
+                        </div>
+                        <div class="key-item">
+                            <label for="private_key">Private Key:</label>
+                            <input type="text" name="private_key" id="private_key" class="input-small" readonly>
+                            <span id="private-status" class="status-indicator"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-Decryption key:
-&nbsp; <input type="text" size=5 name = decrypt_key>
-&nbsp; <input type="button" value="Decode message"
- onClick=decrypt()><P>
-<font color="red"><b>The decrypted message:</b></font>
-<input type="text" size=35 value="" name="decrypted">
-</form>
+            <!-- Step 2: Encrypt -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <h3>Encrypt Message</h3>
+                </div>
+                <p>Enter a message and use one of the generated keys to encrypt it. Anyone can use your public key to encrypt messages for you.</p>
+                
+                <form name="myform">
+                    <div class="form-row">
+                        <label for="input">Message:</label>
+                        <input type="text" name="input" id="input" class="input-medium" placeholder="Enter your secret message...">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="encrypt_key">Encryption Key:</label>
+                        <input type="text" name="encrypt_key" id="encrypt_key" class="input-small" placeholder="Key">
+                        <button type="button" class="btn" onclick="encrypt()">
+                            <i class="fas fa-shield-alt"></i>
+                            Encrypt Message
+                        </button>
+                    </div>
+                    
+                    <div class="result-box">
+                        <label class="result-label">Encrypted Message:</label>
+                        <input type="text" name="crypted" id="crypted" class="input-large" readonly placeholder="Encrypted data will appear here...">
+                    </div>
+                </form>
+            </div>
 
-<!-- Google Ads -->
+            <!-- Step 3: Decrypt -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h3>Decrypt Message</h3>
+                </div>
+                <p>Use the corresponding key to decrypt the message. If you encrypted with the public key, use the private key to decrypt (and vice versa).</p>
+                
+                <div class="hint">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>Hint:</strong> If you used one of the keys from Step 1 to encrypt, the other key will decrypt the message.
+                </div>
+                
+                <form name="decrypt_form">
+                    <div class="form-row">
+                        <label for="decrypt_key">Decryption Key:</label>
+                        <input type="text" name="decrypt_key" id="decrypt_key" class="input-small" placeholder="Key">
+                        <button type="button" class="btn btn-secondary" onclick="decrypt()">
+                            <i class="fas fa-unlock"></i>
+                            Decrypt Message
+                        </button>
+                    </div>
+                    
+                    <div class="result-box">
+                        <label class="result-label">Decrypted Message:</label>
+                        <input type="text" name="decrypted" id="decrypted" class="input-large" readonly placeholder="Decrypted message will appear here...">
+                    </div>
+                </form>
+            </div>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<ins class="adsbygoogle"
-     style="display:block; text-align:center;"
-     data-ad-layout="in-article"
-     data-ad-format="fluid"
-     data-ad-client="ca-pub-3526678290068011"
-     data-ad-slot="7160066188"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-<!-- END -->
+            <!-- Clear Button -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="button" class="btn" onclick="clearAll()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-refresh"></i>
+                    Reset Demo
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        let A = new Array(35);
+        const Chars0 = "................................"; // 0-31
+        const Chars1 = ' !"#$%&.()*.,-./0123456789:;<=>?'; //32-63
+        const Chars2 = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"; //64-95
+        const Chars3 = "..abcdefghijklmnopqrstuvwxyz{|}~."; //96-127
+        const Chars4 = "................................"; //128 - 159
+        const Chars5 = "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞß"; //160 - 191
+        const Chars6 = "àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"; //192 - 223
+        const Chars7 = "ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚě"; //224 - 255
+        const all_Chars = Chars0 + Chars1 + Chars2 + Chars3 + Chars4 + Chars5 + Chars6 + Chars7;
 
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="anir0y" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+        function updateStatus() {
+            const publicKey = document.gen_form.public_key.value;
+            const privateKey = document.gen_form.private_key.value;
+            
+            const publicStatus = document.getElementById('public-status');
+            const privateStatus = document.getElementById('private-status');
+            
+            if (publicKey) {
+                publicStatus.className = 'status-indicator status-ready';
+                publicStatus.title = 'Public key generated';
+            } else {
+                publicStatus.className = 'status-indicator status-pending';
+                publicStatus.title = 'No public key';
+            }
+            
+            if (privateKey) {
+                privateStatus.className = 'status-indicator status-ready';
+                privateStatus.title = 'Private key generated';
+            } else {
+                privateStatus.className = 'status-indicator status-pending';
+                privateStatus.title = 'No private key';
+            }
+        }
 
-<!-- EOF -->
+        function clearAll() {
+            document.gen_form.public_key.value = "";
+            document.gen_form.private_key.value = "";
+            document.myform.input.value = "";
+            document.myform.encrypt_key.value = "";
+            document.myform.crypted.value = "";
+            document.decrypt_form.decrypt_key.value = "";
+            document.decrypt_form.decrypted.value = "";
+            updateStatus();
+        }
+
+        function generate() {
+            const today = new Date();
+            const key1 = today.getTime() % 256;
+            
+            document.gen_form.public_key.value = key1;
+            document.gen_form.private_key.value = 256 - key1;
+            
+            // Add visual feedback
+            const step = document.querySelector('.step');
+            step.classList.add('fade-in');
+            
+            updateStatus();
+            
+            // Auto-fill encryption key with public key for convenience
+            document.myform.encrypt_key.value = key1;
+            document.decrypt_form.decrypt_key.value = 256 - key1;
+        }
+
+        function encrypt() {
+            const message = document.myform.input.value;
+            const key = parseInt(document.myform.encrypt_key.value);
+            
+            if (!message) {
+                alert('Please enter a message to encrypt');
+                return;
+            }
+            
+            if (!key) {
+                alert('Please enter an encryption key');
+                return;
+            }
+            
+            const len = message.length;
+            let encrypted = "";
+            
+            for (let n = 0; n < len; n++) {
+                A[n] = message.charCodeAt(n);
+                for (let j = 0; j < key; j++) {
+                    A[n]++;
+                }
+                encrypted += A[n] + " ";
+            }
+            
+            document.myform.crypted.value = encrypted.trim();
+            
+            // Add visual feedback
+            const resultBox = document.myform.crypted.parentElement;
+            resultBox.classList.add('fade-in');
+        }
+
+        function decrypt() {
+            const key = parseInt(document.decrypt_form.decrypt_key.value) - 256;
+            const len = document.myform.input.value.length;
+            
+            if (!document.decrypt_form.decrypt_key.value) {
+                alert('Please enter a decryption key');
+                return;
+            }
+            
+            if (!A || A.length === 0) {
+                alert('Please encrypt a message first');
+                return;
+            }
+            
+            let decrypted = "";
+            for (let i = 0; i < len; i++) {
+                const decrypt_value = (A[i] + key) % 256;
+                decrypted += all_Chars.charAt(decrypt_value);
+            }
+            
+            document.decrypt_form.decrypted.value = decrypted;
+            
+            // Add visual feedback
+            const resultBox = document.decrypt_form.decrypted.parentElement;
+            resultBox.classList.add('fade-in');
+        }
+
+        // Auto-copy keys when generated
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalBg = element.style.background;
+                element.style.background = '#10b981';
+                setTimeout(() => {
+                    element.style.background = originalBg;
+                }, 200);
+            });
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            clearAll();
+            updateStatus();
+        };
+
+        // Add click-to-copy functionality for keys
+        document.addEventListener('DOMContentLoaded', function() {
+            const publicKeyInput = document.getElementById('public_key');
+            const privateKeyInput = document.getElementById('private_key');
+            
+            publicKeyInput.addEventListener('click', function() {
+                if (this.value) {
+                    copyToClipboard(this.value, this);
+                }
+            });
+            
+            privateKeyInput.addEventListener('click', function() {
+                if (this.value) {
+                    copyToClipboard(this.value, this);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
