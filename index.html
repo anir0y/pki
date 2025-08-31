@@ -738,20 +738,16 @@
             }, 600);
         }
 
-        function decrypt() {
-            const key = parseInt(document.getElementById('decrypt_key').value);
-            const len = document.getElementById('input').value.length;
-            
-            if (!document.getElementById('decrypt_key').value) {
-                alert('⚠️ Please enter a decryption key');
-                document.getElementById('decrypt_key').focus();
-                return;
+            let decrypted = "";
+            for (let i = 0; i < len; i++) {
+                let decrypt_value = A[i];
+                for (let j = 0; j < key; j++) {
+                    decrypt_value--;
+                }
+                decrypted += String.fromCharCode(decrypt_value);
             }
             
-            if (!A || A.length === 0 || !document.getElementById('crypted').value) {
-                alert('⚠️ Please encrypt a message first');
-                return;
-            }
+            document.getElementById('decrypted').value = decrypted;
             
             let decrypted = "";
             for (let i = 0; i < len; i++) {
