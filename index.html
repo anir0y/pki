@@ -701,8 +701,9 @@
         }
 
         function encrypt() {
+            const len = document.getElementById('input').value.length;
             const message = document.getElementById('input').value;
-            const key = parseInt(document.getElementById('encrypt_key').value);
+            const key = document.getElementById('encrypt_key').value;
             
             if (!message.trim()) {
                 alert('⚠️ Please enter a message to encrypt');
@@ -716,18 +717,15 @@
                 return;
             }
             
-            const len = message.length;
-            let encrypted = "";
+            document.getElementById('crypted').value = "";
             
             for (let n = 0; n < len; n++) {
                 A[n] = message.charCodeAt(n);
                 for (let j = 0; j < key; j++) {
                     A[n]++;
                 }
-                encrypted += A[n] + " ";
+                document.getElementById('crypted').value += A[n];
             }
-            
-            document.getElementById('crypted').value = encrypted.trim();
             
             // Add visual feedback
             const resultBox = document.getElementById('crypted').parentElement;
@@ -738,27 +736,15 @@
             }, 600);
         }
 
-            let decrypted = "";
+        function decrypt() {
+            const key = document.getElementById('decrypt_key').value - 256;
+            const len = document.getElementById('input').value.length;
+            document.getElementById('decrypted').value = "";
+            
             for (let i = 0; i < len; i++) {
-                let decrypt_value = A[i];
-                for (let j = 0; j < key; j++) {
-                    decrypt_value--;
-                }
-                decrypted += String.fromCharCode(decrypt_value);
+                const decrypt_value = (A[i] + key) % 256;
+                document.getElementById('decrypted').value += all_Chars.charAt(decrypt_value);
             }
-            
-            document.getElementById('decrypted').value = decrypted;
-            
-            let decrypted = "";
-            for (let i = 0; i < len; i++) {
-                let decrypt_value = A[i];
-                for (let j = 0; j < key; j++) {
-                    decrypt_value--;
-                }
-                decrypted += String.fromCharCode(decrypt_value);
-            }
-            
-            document.getElementById('decrypted').value = decrypted;
             
             // Add visual feedback
             const resultBox = document.getElementById('decrypted').parentElement;
