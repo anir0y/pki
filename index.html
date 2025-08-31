@@ -1,137 +1,1331 @@
-@@ -0,0 +1,136 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<head>
-<style type="text/css">
-H1 {color:red}
-P  {font-family:Arial; font-size:14pt}
-B  {color:blue}
-</style>
-<title>Public-Key encryption Demo</title>
-<script language="JavaScript1.2">
- A  = new Array (35);
-Chars0 = "................................"; // 0-31
-	Chars1 = ' !"#$%&.()*.,-./0123456789:;<=>?'; //32-63
-	Chars2 = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_"; //64-95
-	Chars3 = "..abcdefghijklmnopqrstuvwxyz{|}~."; //96-127
-	Chars4 = "................................"; //128 - 159
-	Chars5 = "��������������������������������"; //160 - 191
-	Chars6 = "��������������������������������"; //192 - 223
-	Chars7 = "��������������������������������"; //224 - 255
-	all_Chars = Chars0+Chars1+Chars2+Chars3+Chars4+Chars5+Chars6+Chars7;
-
-function clear() {
-	document.gen_form.public_key.value ="";
-	document.gen_form.private_key.value= "";
-	document.myform.input.value="";
-	document.myform.encrypt_key.value = "";
-	document.myform.crypted.value="";
-}
-
-function generate() {
-	today = new Date();
-	key1 = today.getTime()%256;
-	document.gen_form.public_key.value = key1;
-	document.gen_form.private_key.value= 256 - key1;
-}
-
-		
-function encrypt() {
- 
-	len = document.myform.input.value.length;
-	message = document.myform.input.value;
-	key = document.myform.encrypt_key.value;
-
-	document.myform.crypted.value="";
-	for (n=0;n<len;n++) {
-	 A[n] =  message.charCodeAt(n);
-         for (j=0;j<key;j++){
-	    A[n] ++; 
-         }
-         //document.myform.crypted.value += " ";
-	 document.myform.crypted.value += A[n];
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public-Key Encryption Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-}
 
-function decrypt() {
-	
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #161616;
+            --accent-color: #00ff00;
+            --text-primary: #e5e5e5;
+            --text-secondary: #888888;
+            --cyber-glow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
 
-	key = document.decrypt_form.decrypt_key.value - 256;
-	len = document.myform.input.value.length;
-	document.decrypt_form.decrypted.value="";
-        for (i=0;i<len;i++) {
-	    decrypt_value = (A[i]+key)%256;
-	    document.decrypt_form.decrypted.value += all_Chars.charAt(decrypt_value);
-	}
-}
-</script>
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--primary-dark);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--secondary-dark);
+            border-bottom: 1px solid var(--accent-color);
+            z-index: 1000;
+            padding: 0.75rem 0;
+            box-shadow: var(--cyber-glow);
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .nav-left {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-right {
+            margin-left: auto;
+        }
+
+        .nav-btn.reset-btn {
+            padding: 0.5rem 1.2rem;
+            font-size: 0.9rem;
+            height: 38px;
+            background: var(--secondary-dark);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reset-text {
+            font-weight: 700;
+        }
+
+        .reset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 0, 0, 0.2), 
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .reset-btn:hover::before {
+            left: 100%;
+        }
+
+        .reset-btn::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #ff0000, 
+                transparent, 
+                #ff0000, 
+                transparent
+            );
+            z-index: -1;
+            animation: glowBorder 2s linear infinite;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes glowBorder {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .reset-btn:hover {
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+            box-shadow: 
+                0 0 10px rgba(255, 0, 0, 0.3),
+                0 0 20px rgba(255, 0, 0, 0.2),
+                0 0 30px rgba(255, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+
+        .nav-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+            box-shadow: var(--cyber-glow);
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+            text-shadow: var(--cyber-glow);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .nav-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover .nav-icon {
+            transform: scale(1.1);
+        }
+
+        body {
+            padding-top: 5rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--secondary-dark);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            box-shadow: var(--cyber-glow);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--primary-dark);
+            border-bottom: 1px solid var(--accent-color);
+            color: var(--text-primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            font-size: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .step {
+            margin-bottom: 3rem;
+            padding: 2.5rem;
+            background: var(--primary-dark);
+            border-radius: 8px;
+            border: 1px solid var(--accent-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--cyber-glow);
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--accent-color);
+            box-shadow: var(--cyber-glow);
+        }
+
+        .step:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: #c7d2fe;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .step-number {
+            background: var(--secondary-dark);
+            color: var(--accent-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-right: 1.5rem;
+            box-shadow: var(--cyber-glow);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .step h3 {
+            color: var(--accent-color);
+            font-size: 1.75rem;
+            font-weight: 600;
+            text-shadow: var(--cyber-glow);
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-weight: 500;
+            color: #374151;
+            min-width: 140px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"] {
+            padding: 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            font-family: 'Inter', monospace;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        input[type="text"]:hover:not(:focus) {
+            border-color: #d1d5db;
+        }
+
+        input[readonly] {
+            background: #f9fafb;
+            cursor: pointer;
+        }
+
+        input[readonly]:hover {
+            background: #f3f4f6;
+        }
+
+        .input-small {
+            width: 100px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .input-medium {
+            width: 320px;
+        }
+
+        .input-large {
+            width: 100%;
+            max-width: 500px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: var(--secondary-dark);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--cyber-glow);
+            position: relative;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .btn-danger {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .result-box {
+            background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .result-box:hover {
+            border-color: #cbd5e1;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .hint {
+            background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            color: #92400e;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .hint-icon {
+            color: #f59e0b;
+            font-size: 1.25rem;
+            margin-top: 0.125rem;
+        }
+
+        .key-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .key-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .key-item:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .key-item label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .key-item input {
+            width: 100%;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .status-ready {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-pending {
+            background: #f59e0b;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+        }
+
+        .copy-indicator {
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .copy-indicator.show {
+            opacity: 1;
+            top: -3rem;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .reset-section {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .step {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            label {
+                min-width: auto;
+            }
+
+            .key-display {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .actions-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+
+        .security-details {
+            margin-top: 1rem;
+        }
+
+        .security-summary {
+            cursor: pointer;
+            padding: 1rem;
+            background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
+            color: #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .security-summary:hover {
+            background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+            transform: translateY(-1px);
+        }
+
+        .security-details[open] .security-summary {
+            margin-bottom: 1rem;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .security-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .success-flash {
+            animation: successFlash 0.6s ease;
+        }
+
+        @keyframes successFlash {
+            0% { background: #10b981; }
+            100% { background: white; }
+        }
+    </style>
 </head>
-<body bgcolor="oldlace" onLoad=clear()>
-<center>
-<h1>Public-Key encryption Demo</h1>
-</center>
-<font color="blue"><h3>Step 1: Generate Keys</h3></font>
-<P>Press the button to generate a pair of randomly chosen keys.</p>
-<ul>
-<li>
-<P>
-The <b>public key</b> will be posted in a  public key repository
-where anyone can find it. </p?
-<li><P>The <b>private key</b> should be known only to
-you.</p>
-</ul>
-<form name="gen_form">
-<input type="button" value="Generate keys" onClick = generate()>
-Public key: &nbsp; 
-<input type ="text" size=5 name="public_key">
-Private key: &nbsp; 
-<input type ="text" size=5 name="private_key">
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-links">
+                <div class="nav-left">
+                    <a href="/" class="nav-link">
+                        <span class="nav-icon">🏠</span>
+                        Home
+                    </a>
+                    <a href="https://anir0y.in" class="nav-link" target="_blank" rel="noopener noreferrer">
+                        <span class="nav-icon">👨‍💻</span>
+                        anir0y.in
+                    </a>
+                </div>
+                <div class="nav-right">
+                    <button type="button" class="nav-btn reset-btn" onclick="clearAll()">
+                        <div class="reset-btn-content">
+                            <span class="nav-icon blink">⚡</span>
+                            <span class="reset-text">RESET</span>
+                        </div>
+                        <div class="reset-btn-glitch"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-</form>
-<font color="blue"><h3>Step 2: Encrypt the message </h3></font>
-<P>Now type in a short message and enter one of the keys from above.
-Then press the button.</p>
-<form name="myform">
-Message: &nbsp;
-<input type="text" size=35 value="" name="input">
-Encryption key:
-&nbsp; <input type="text" size=5 name = encrypt_key>
-&nbsp; <input type="button" value="Encode message"
- onClick=encrypt()><P>
-<font color="red"><b>The encrypted message:</b></font>
-<input type="text" size=75 value="" name="crypted">
-</form>
-<font color="blue"><h3>Step 3: Decrypt the message </h3></font>
-<P>Pretend that you have received the encrypted message over the Internet. 
-Now enter an appropriate decryption key and press the "Decode" button.</p>
-<P>
-<i>Hint:</i> If you used one of the two keys generated in step 1, 
-the other key works here.</p>
-<form name="decrypt_form">
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>
+                    <span class="header-icon">🔐</span>
+                    Public-Key Encryption Demo
+                </h1>
+                <p>Learn how asymmetric encryption works with this interactive demonstration</p>
+            </div>
+        </div>
 
-Decryption key:
-&nbsp; <input type="text" size=5 name = decrypt_key>
-&nbsp; <input type="button" value="Decode message"
- onClick=decrypt()><P>
-<font color="red"><b>The decrypted message:</b></font>
-<input type="text" size=35 value="" name="decrypted">
-</form>
+        <div class="content">
+            <!-- Step 1: Generate Keys -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <h3>Generate Key Pair</h3>
+                </div>
+                <p class="step-description">
+                    Generate a pair of mathematically related keys. The public key can be shared openly, 
+                    while the private key must remain secret. Together, they enable secure communication.
+                </p>
+                
+                <div class="form-group">
+                    <button type="button" class="btn" onclick="generate()">
+                        <span>🔑</span>
+                        Generate Key Pair
+                    </button>
+                </div>
+                
+                <div class="key-display">
+                    <div class="key-item" id="public-key-item">
+                        <div class="status-indicator" id="public-status"></div>
+                        <label for="public_key">Public Key</label>
+                        <input type="text" name="public_key" id="public_key" class="input-small" readonly placeholder="---">
+                        <div class="copy-indicator" id="public-copy">Copied!</div>
+                    </div>
+                    <div class="key-item" id="private-key-item">
+                        <div class="status-indicator" id="private-status"></div>
+                        <label for="private_key">Private Key</label>
+                        <input type="text" name="private_key" id="private_key" class="input-small" readonly placeholder="---">
+                        <div class="copy-indicator" id="private-copy">Copied!</div>
+                    </div>
+                </div>
+            </div>
 
-<!-- Google Ads -->
+            <!-- Step 2: Encrypt -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <h3>Encrypt Message</h3>
+                </div>
+                <p class="step-description">
+                    Enter a message and use one of the generated keys to encrypt it. 
+                    Anyone can use your public key to encrypt messages that only you can decrypt.
+                </p>
+                
+                <div class="form-group">
+                    <div class="form-row">
+                        <label for="input">Message:</label>
+                        <input type="text" name="input" id="input" class="input-medium" placeholder="Enter your secret message...">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="encrypt_key">Encryption Key:</label>
+                        <input type="text" name="encrypt_key" id="encrypt_key" class="input-small" placeholder="Key">
+                        <div class="actions-row">
+                            <button type="button" class="btn" onclick="encrypt()">
+                                <span>🛡️</span>
+                                Encrypt Message
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="result-box">
+                        <div class="result-label">
+                            <span>🔒</span>
+                            Encrypted Message:
+                        </div>
+                        <input type="text" name="crypted" id="crypted" class="input-large" readonly placeholder="Encrypted data will appear here...">
+                    </div>
+                </div>
+            </div>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<ins class="adsbygoogle"
-     style="display:block; text-align:center;"
-     data-ad-layout="in-article"
-     data-ad-format="fluid"
-     data-ad-client="ca-pub-3526678290068011"
-     data-ad-slot="7160066188"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-<!-- END -->
+            <!-- Step 3: Decrypt -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h3>Decrypt Message</h3>
+                </div>
+                <p class="step-description">
+                    Use the corresponding key to decrypt the message. If you encrypted with the public key, 
+                    use the private key to decrypt (and vice versa).
+                </p>
+                
+                <div class="hint">
+                    <span class="hint-icon">🔑</span>
+                    <div>
+                        <strong>[DECRYPTION GUIDE]:</strong>
+                        <ul style="margin-top: 8px; list-style-type: none;">
+                            <li>➤ If encrypted with <span class="key-highlight">PUBLIC KEY</span>: Use <span class="key-highlight">PRIVATE KEY</span> to decrypt</li>
+                            <li>➤ If encrypted with <span class="key-highlight">PRIVATE KEY</span>: Use <span class="key-highlight">PUBLIC KEY</span> to decrypt</li>
+                        </ul>
+                        <div style="margin-top: 8px; font-size: 0.9em; opacity: 0.8;">
+                            This inverse relationship between keys is fundamental to asymmetric encryption systems.
+                        </div>
+                    </div>
+                </div>
 
+                <style>
+                    .hint {
+                        background: rgba(0, 255, 0, 0.05);
+                        border: 1px solid var(--accent-color);
+                        box-shadow: var(--cyber-glow);
+                    }
+                    .key-highlight {
+                        color: var(--accent-color);
+                        font-family: 'JetBrains Mono', monospace;
+                        font-weight: bold;
+                        text-shadow: var(--cyber-glow);
+                    }
+                    .hint ul li {
+                        margin: 5px 0;
+                        font-family: 'JetBrains Mono', monospace;
+                    }
+                </style>
+                
+                <div class="form-group">
+                    <div class="form-row">
+                        <label for="decrypt_key">Decryption Key:</label>
+                        <input type="text" name="decrypt_key" id="decrypt_key" class="input-small" placeholder="Key">
+                        <div class="actions-row">
+                            <button type="button" class="btn btn-success" onclick="decrypt()">
+                                <span>🔓</span>
+                                Decrypt Message
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="result-box">
+                        <div class="result-label">
+                            <span>✨</span>
+                            Decrypted Message:
+                        </div>
+                        <input type="text" name="decrypted" id="decrypted" class="input-large" readonly placeholder="Decrypted message will appear here...">
+                    </div>
+                </div>
+            </div>
 
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="anir0y" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+            <!-- Security Analysis Section -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <h3>Security Analysis</h3>
+                </div>
+                <p class="step-description">
+                    This demo uses a simple shift cipher for educational purposes. In real-world scenarios, 
+                    such basic encryption can be broken using various tools and techniques.
+                </p>
+                
+                <details class="security-details">
+                    <summary class="security-summary">👉 Click to show brute-force methods and tools</summary>
+                    <div class="hint" style="background: linear-gradient(145deg, #fee2e2 0%, #fecaca 100%); border-color: #ef4444; margin-top: 1rem;">
+                    <span class="hint-icon">⚠️</span>
+                    <div>
+                        <strong>Security Notice:</strong><br>
+                        This encryption can be broken using common tools in Kali Linux:
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>CyberChef:</strong> Use the "Magic" operation to detect the encryption and try automatic decryption</li>
+                            <li><strong>Python script:</strong> Write a simple script to try all 256 possible shifts</li>
+                            <li><strong>xxd:</strong> Convert the encrypted numbers back to ASCII characters</li>
+                            <li><strong>Statistical analysis:</strong> Use tools like 'frequency' to analyze character distribution</li>
+                        </ul>
+                        Complete Python script for brute-force (save as bruteforce.py):
+                        <pre style="background: #1f2937; color: #e5e7eb; padding: 10px; border-radius: 8px; margin-top: 10px; overflow-x: auto; font-size: 0.9em;">
+#!/usr/bin/env python3
 
-<!-- EOF -->
+import string
+import sys
+from typing import List, Tuple
+
+class BruteForce:
+    def __init__(self):
+        # Characters that typically appear in readable text
+        self.common_chars = set(string.ascii_letters + string.digits + string.punctuation + ' ')
+        # Minimum percentage of readable characters to consider a result valid
+        self.readability_threshold = 0.75
+
+    def is_readable(self, text: str) -> bool:
+        """Check if decrypted text appears to be readable."""
+        readable_chars = sum(1 for c in text if c in self.common_chars)
+        return (readable_chars / len(text)) >= self.readability_threshold
+
+    def decrypt_with_key(self, numbers: List[int], key: int) -> str:
+        """Decrypt the message using a specific key."""
+        plaintext = ''
+        for num in numbers:
+            dec_val = num
+            # Apply reverse shift key times
+            for _ in range(key):
+                dec_val -= 1
+                if dec_val < 0:
+                    dec_val = 255
+            plaintext += chr(dec_val)
+        return plaintext
+
+    def find_possible_keys(self, numbers: List[int]) -> List[Tuple[int, str]]:
+        """Try all possible keys and return those that produce readable text."""
+        possible_solutions = []
+        
+        # Try all possible keys (0-255)
+        for key in range(256):
+            decrypted = self.decrypt_with_key(numbers, key)
+            
+            # If the result looks readable, add it to possible solutions
+            if self.is_readable(decrypted):
+                possible_solutions.append((key, decrypted))
+            
+        return possible_solutions
+
+def parse_input(cipher_text: str) -> List[int]:
+    """Parse the input string into a list of numbers."""
+    # Remove any whitespace and split the numbers
+    try:
+        # Handle both space-separated and consecutive numbers
+        if ' ' in cipher_text:
+            return [int(x) for x in cipher_text.split()]
+        else:
+            # If numbers are consecutive, split every 3 digits
+            return [int(cipher_text[i:i+3]) for i in range(0, len(cipher_text), 3)]
+    except ValueError as e:
+        print(f"Error parsing input: {e}")
+        print("Input should be numbers separated by spaces or consecutive numbers")
+        sys.exit(1)
+
+def main():
+    # Check if input is provided
+    if len(sys.argv) < 2:
+        print("Usage: python3 bruteforce.py &lt;encrypted_numbers&gt;")
+        print("Example: python3 bruteforce.py '65 66 67'")
+        print("   or: python3 bruteforce.py 656667")
+        sys.exit(1)
+
+    # Get encrypted text from command line argument
+    cipher_text = sys.argv[1]
+    
+    # Parse the input into numbers
+    numbers = parse_input(cipher_text)
+    
+    print(f"Attempting to decrypt: {numbers}")
+    print("\nBrute-forcing all possible keys (0-255)...")
+    print("-" * 50)
+
+    # Create brute force object and find possible solutions
+    brute_force = BruteForce()
+    possible_solutions = brute_force.find_possible_keys(numbers)
+
+    # Display results
+    if possible_solutions:
+        print(f"\nFound {len(possible_solutions)} potential solutions:")
+        print("-" * 50)
+        for key, decrypted in possible_solutions:
+            print(f"Key {key:3d}: {decrypted}")
+    else:
+        print("\nNo readable solutions found!")
+        print("Try adjusting the readability threshold or check the input format.")
+
+    print("\nNote: The most likely solution is the one that makes the most sense in context.")
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nBrute-force attempt cancelled by user.")
+        sys.exit(0)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        sys.exit(1)</pre>
+                        
+                        <div style="background: #374151; color: #e5e7eb; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                        <strong>How to use:</strong>
+                        <ol style="margin-left: 20px; margin-top: 5px;">
+                            <li>Save the code above as <code>bruteforce.py</code></li>
+                            <li>Make it executable: <code>chmod +x bruteforce.py</code></li>
+                            <li>Run it with encrypted numbers either:
+                                <ul style="margin-left: 20px;">
+                                    <li>Space-separated: <code>./bruteforce.py "65 66 67"</code></li>
+                                    <li>Or consecutive: <code>./bruteforce.py 656667</code></li>
+                                </ul>
+                            </li>
+                        </ol>
+                        </div>
+                </details>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="copyright hover-glow">© 2025 Animesh Roy (anir0y)</div>
+                <div class="tagline">Made with <span class="heart">❤️</span> passion for security | education lab</div>
+            </div>
+        </footer>
+    </div>
+
+    <style>
+        .footer {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--secondary-dark);
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            color: var(--text-primary);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-top: 1px solid var(--accent-color);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            animation: borderFlow 3s linear infinite;
+            box-shadow: var(--cyber-glow);
+        }
+
+        @keyframes borderFlow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .copyright {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            text-shadow: 0 0 10px rgba(79, 70, 229, 0.6);
+            letter-spacing: 0.5px;
+        }
+
+        .tagline {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .heart {
+            display: inline-block;
+            animation: heartBeat 1.5s ease-in-out infinite;
+            color: #ef4444;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.2); }
+            20%, 40% { transform: scale(0.9); }
+            50%, 100% { transform: scale(1); }
+        }
+    </style>
+
+    <script>
+        // Initialize array to store message characters during encryption/decryption
+        const A = new Array(35);
+
+        function updateStatus() {
+            const publicKey = document.getElementById('public_key').value;
+            const privateKey = document.getElementById('private_key').value;
+            
+            const publicStatus = document.getElementById('public-status');
+            const privateStatus = document.getElementById('private-status');
+            
+            if (publicKey) {
+                publicStatus.className = 'status-indicator status-ready';
+                publicStatus.title = 'Public key generated - click to copy';
+            } else {
+                publicStatus.className = 'status-indicator status-pending';
+                publicStatus.title = 'No public key generated';
+            }
+            
+            if (privateKey) {
+                privateStatus.className = 'status-indicator status-ready';
+                privateStatus.title = 'Private key generated - click to copy';
+            } else {
+                privateStatus.className = 'status-indicator status-pending';
+                privateStatus.title = 'No private key generated';
+            }
+        }
+
+        function showCopyFeedback(elementId) {
+            const indicator = document.getElementById(elementId);
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        function clearAll() {
+            document.getElementById('public_key').value = "";
+            document.getElementById('private_key').value = "";
+            document.getElementById('input').value = "";
+            document.getElementById('encrypt_key').value = "";
+            document.getElementById('crypted').value = "";
+            document.getElementById('decrypt_key').value = "";
+            document.getElementById('decrypted').value = "";
+            updateStatus();
+        }
+
+        function generate() {
+            const today = new Date();
+            const key1 = today.getTime() % 256;
+            
+            document.getElementById('public_key').value = key1;
+            document.getElementById('private_key').value = 256 - key1;
+            
+            // Add visual feedback
+            const keyItems = document.querySelectorAll('.key-item');
+            keyItems.forEach(item => {
+                item.classList.add('fade-in');
+                item.classList.add('success-flash');
+            });
+            
+            updateStatus();
+            
+            // Auto-fill encryption key with public key for convenience
+            document.getElementById('encrypt_key').value = key1;
+            document.getElementById('decrypt_key').value = 256 - key1;
+            
+            // Remove animation classes after animation completes
+            setTimeout(() => {
+                keyItems.forEach(item => {
+                    item.classList.remove('fade-in', 'success-flash');
+                });
+            }, 600);
+        }
+
+        function encrypt() {
+            const message = document.getElementById('input').value;
+            const key = document.getElementById('encrypt_key').value;
+            
+            if (!message.trim()) {
+                alert('⚠️ Please enter a message to encrypt');
+                document.getElementById('input').focus();
+                return;
+            }
+            
+            if (!key || isNaN(key)) {
+                alert('⚠️ Please enter a valid encryption key');
+                document.getElementById('encrypt_key').focus();
+                return;
+            }
+            
+            document.getElementById('crypted').value = "";
+            
+            try {
+                const len = message.length;
+                for (let n = 0; n < len; n++) {
+                    A[n] = message.charCodeAt(n);
+                    // Apply forward shift based on the key
+                    for (let j = 0; j < key; j++) {
+                        A[n]++;
+                        if (A[n] > 255) A[n] = 0;
+                    }
+                    document.getElementById('crypted').value += A[n];
+                }
+                
+                // Add visual feedback
+                const resultBox = document.getElementById('crypted').parentElement;
+                resultBox.classList.add('fade-in');
+                
+                setTimeout(() => {
+                    resultBox.classList.remove('fade-in');
+                }, 600);
+            } catch (error) {
+                alert('⚠️ Error during encryption. Please check your input.');
+                console.error('Encryption error:', error);
+            }
+        }
+
+        function decrypt() {
+            const key = document.getElementById('decrypt_key').value;
+            if (!key || isNaN(key)) {
+                alert('⚠️ Please enter a valid decryption key');
+                document.getElementById('decrypt_key').focus();
+                return;
+            }
+
+            const len = document.getElementById('input').value.length;
+            document.getElementById('decrypted').value = "";
+            
+            try {
+                for (let i = 0; i < len; i++) {
+                    // Apply inverse shift based on the key
+                    let decrypt_value = A[i];
+                    for (let j = 0; j < (256 - key); j++) {
+                        decrypt_value--;
+                        if (decrypt_value < 0) decrypt_value = 255;
+                    }
+                    document.getElementById('decrypted').value += String.fromCharCode(decrypt_value);
+                }
+                
+                // Add visual feedback
+                const resultBox = document.getElementById('decrypted').parentElement;
+                resultBox.classList.add('fade-in');
+                
+                setTimeout(() => {
+                    resultBox.classList.remove('fade-in');
+                }, 600);
+            } catch (error) {
+                alert('⚠️ Error during decryption. Please check your input and key.');
+                console.error('Decryption error:', error);
+            }
+        }
+
+        function copyToClipboard(text, indicatorId) {
+            if (!text) return;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyFeedback(indicatorId);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopyFeedback(indicatorId);
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', function() {
+            clearAll();
+            updateStatus();
+            
+            // Add click-to-copy functionality
+            document.getElementById('public_key').addEventListener('click', function() {
+                copyToClipboard(this.value, 'public-copy');
+            });
+            
+            document.getElementById('private_key').addEventListener('click', function() {
+                copyToClipboard(this.value, 'private-copy');
+            });
+            
+            // Add enter key support for forms
+            document.getElementById('input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    encrypt();
+                }
+            });
+            
+            document.getElementById('encrypt_key').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    encrypt();
+                }
+            });
+            
+            document.getElementById('decrypt_key').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    decrypt();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
