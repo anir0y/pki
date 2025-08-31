@@ -739,7 +739,7 @@
         }
 
         function decrypt() {
-            const key = parseInt(document.getElementById('decrypt_key').value) - 256;
+            const key = parseInt(document.getElementById('decrypt_key').value);
             const len = document.getElementById('input').value.length;
             
             if (!document.getElementById('decrypt_key').value) {
@@ -755,8 +755,11 @@
             
             let decrypted = "";
             for (let i = 0; i < len; i++) {
-                const decrypt_value = (A[i] + key) % 256;
-                decrypted += all_Chars.charAt(decrypt_value);
+                let decrypt_value = A[i];
+                for (let j = 0; j < key; j++) {
+                    decrypt_value--;
+                }
+                decrypted += String.fromCharCode(decrypt_value);
             }
             
             document.getElementById('decrypted').value = decrypted;
